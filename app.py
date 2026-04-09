@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 MY_EMAIL = "ar3097058@gmail.com"
 
 def send_email(name, phone, interest):
-    # Subject aur Body setup
+    # Email Body Taiyar Karna
     message_text = f"Naya Customer Inquiry!\n\nNaam: {name}\nPhone: {phone}\nInterest: {interest}"
     msg = MIMEText(message_text)
     msg['Subject'] = f"New Lead: {name} (Ajay Organization)"
@@ -15,32 +15,31 @@ def send_email(name, phone, interest):
     msg['To'] = MY_EMAIL
 
     try:
-        # Aapka naya 16-digit App Password
-        # Quotes ke andar bina spaces ke likhna sabse sahi tarika hai
-        current_password = "jxvkydwuyhzcvybk" 
+        # Render par security ke liye EMAIL_PASS variable use karein
+        # Agar Render pe nahi hai, toh ye niche wala 16-digit password use karega
+        current_password = os.environ.get("EMAIL_PASS") or "jxvkydwuyhzcvybk" 
 
-        # SMTP Setup
+        # SMTP Connection Setup
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls() 
         
-        # Login using the app password from your image
+        # Login using App Password
         server.login(MY_EMAIL, current_password) 
         
         server.sendmail(MY_EMAIL, MY_EMAIL, msg.as_string())
         server.quit()
-        return True
+        return "SUCCESS"
     except Exception as e:
-        st.error(f"SMTP Error: {e}")
-        return False
+        return str(e)
 
-# --- UI (Website Design) ---
+# --- UI DESIGN (Sentinel AI Theme) ---
 st.set_page_config(page_title="Sentinel AI: Secure Real-Estate Agent", page_icon="🏢")
 st.title("🏢 Sentinel AI: Secure Real-Estate Agent")
 st.markdown("### Real Estate & Construction Materials")
 
 st.info("Quality materials aur best properties ke liye humse judein.")
 
-# Inventory Details
+# Inventory Section
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("📍 Properties")
@@ -63,10 +62,13 @@ with st.form("my_form", clear_on_submit=True):
 if submit:
     if name.strip() != "" and phone.strip() != "":
         with st.spinner("Processing..."):
-            result = send_email(name, phone, choice)
-            if result:
+            status = send_email(name, phone, choice)
+            
+            if status == "SUCCESS":
                 st.success(f"Dhanyawad {name}! Ajay Organization aapko jald contact karegi.")
+                st.balloons()
             else:
-                st.error("Technical error: Connection failed. Check your App Password.")
+                st.error(f"Technical error: {status}")
+                st.warning("Paisa bachane ke liye Render pe 'EMAIL_PASS' variable add karein.")
     else:
-        st.warning("Please fill all details.")
+        st.warning("Kripya saari jankari bharein.")
